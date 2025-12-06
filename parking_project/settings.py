@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-cm6s%hoxoe14vx7rf6@@(i#4illcz78sv1m&i*bpa$gh5a)f8h
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['ksm-lot-book.onrender.com', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['parking-slot-book.onrender.com', 'localhost', '127.0.0.1']
 
 
 # Application definition
