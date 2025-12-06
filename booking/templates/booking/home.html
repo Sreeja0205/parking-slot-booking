@@ -1,0 +1,201 @@
+<!-- booking/templates/booking/home.html -->
+{% extends 'booking/base.html' %}
+
+{% block title %}Home - Parking Slot Booking{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    
+    <!-- Welcome Section -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="text-center" style="color: #007bff; margin-bottom: 30px;">
+                Welcome to Parking Slot Booking System !!!!
+            </h1>
+            <p class="text-center text-muted">
+                Select a date and hour to see available parking slots
+            </p>
+        </div>
+    </div>
+
+    <!-- Search Form -->
+    <div class="row justify-content-center mb-4">
+        <div class="col-md-8">
+            <div class="card" style="background: #f8f9fa; border: 2px solid #007bff;">
+                <div class="card-body">
+                    <h5 class="card-title" style="color: #007bff;">Search Available Slots</h5>
+                    
+                    <form method="POST" action="{% url 'home' %}">
+                        {% csrf_token %}
+                        
+                        <div class="form-row">
+                            <!-- Date Input -->
+                            <div class="form-group col-md-6">
+                                <label for="date">📅 Select Date:</label>
+                                <input 
+                                    type="date" 
+                                    name="date" 
+                                    id="date" 
+                                    class="form-control" 
+                                    required
+                                    min="{% now 'Y-m-d' %}"
+                                >
+                            </div>
+
+                            <!-- Hour Input -->
+                            <div class="form-group col-md-6">
+                                <label for="hour">⏰ Select Hour (0-23):</label>
+                                <select name="hour" id="hour" class="form-control" required>
+                                    <option value="">-- Choose Hour --</option>
+                                    {% for h in "x"|rjust:"24" %}
+                                        <option value="{{ forloop.counter0 }}">
+                                            {{ forloop.counter0|stringformat:"02d" }}:00 ({{ forloop.counter0|stringformat:"02d" }})
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-lg btn-primary" style="width: 100%; font-weight: bold;">
+                                🔍 Search Available Slots
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Available Slots Display -->
+    {% if slots %}
+        <div class="row">
+            <div class="col-md-12">
+                <h3 class="mb-4">
+                    ✅ Available Slots 
+                    {% if date %}
+                        on <strong>{{ date }}</strong>
+                    {% endif %}
+                    {% if hour %}
+                        at <strong>{{ hour|stringformat:"02d" }}:00</strong>
+                    {% endif %}
+                </h3>
+            </div>
+        </div>
+
+        <div class="row">
+            {% for slot in slots %}
+                <div class="col-md-4 col-sm-6 col-lg-3 mb-4">
+                    <div class="card text-center" style="border: 2px solid #28a745; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);">
+                        <div class="card-body">
+                            <h5 class="card-title" style="color: #28a745; font-size: 24px;">
+                                🅿️ {{ slot.slot_number }}
+                            </h5>
+                            <p class="card-text text-success"><strong>AVAILABLE</strong></p>
+                            
+                            {% if user.is_authenticated %}
+                                <form method="GET" action="{% url 'book_slot' slot.id %}">
+                                    <input type="hidden" name="date" value="{{ date }}">
+                                    <input type="hidden" name="start_hour" value="{{ hour }}">
+                                    <button type="submit" class="btn btn-book btn-block">
+                                        📍 Book This Slot
+                                    </button>
+                                </form>
+                            {% else %}
+                                <p class="text-danger mt-3"><strong>Login to book a slot</strong></p>
+                                <a href="{% url 'login' %}" class="btn btn-primary btn-block">Login</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+    {% elif date and hour %}
+        <!-- No Slots Available Message -->
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <h5>❌ No slots available!</h5>
+            <p>All parking slots are booked for <strong>{{ date }}</strong> at <strong>{{ hour|stringformat:"02d" }}:00</strong></p>
+            <p>Try selecting a different date or hour.</p>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    {% endif %}
+
+    <!-- Instructions Section -->
+    <div class="row mt-5">
+        <div class="col-md-12">
+            <div class="alert alert-info" role="alert">
+                <h5>📋 How to Book a Slot:</h5>
+                <ul class="mb-0">
+                    <li>Select your preferred <strong>future date</strong> (today or later)</li>
+                    <li>Select a <strong>future hour</strong> (you can only book upcoming time slots)</li>
+                    <li>View all <strong>available slots</strong> for that time</li>
+                    <li><strong>Login</strong> to your account (or register if new)</li>
+                    <li>Click <strong>"Book This Slot"</strong> on your chosen slot</li>
+                    <li>Confirm your booking duration</li>
+                    <li>Done! Check "My Bookings" to see your reservation</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // Get today's date
+    const today = new Date();
+    const todayString = today.toISOString().split('T')[0];
+    
+    // Set minimum date to today
+    document.getElementById('date').min = todayString;
+    
+    // Disable past hours based on selected date
+    const dateInput = document.getElementById('date');
+    const hourSelect = document.getElementById('hour');
+    
+    function updateAvailableHours() {
+        const selectedDate = new Date(dateInput.value + 'T00:00:00');
+        const todayDate = new Date(todayString + 'T00:00:00');
+        const currentHour = today.getHours();
+        
+        const options = hourSelect.querySelectorAll('option');
+        
+        options.forEach(option => {
+            if (option.value === '') {
+                return; // Skip placeholder
+            }
+            
+            const hour = parseInt(option.value);
+            
+            // If selected date is TODAY, disable past hours
+            if (selectedDate.getTime() === todayDate.getTime()) {
+                if (hour <= currentHour) {
+                    option.disabled = true;
+                    option.textContent = `${hour.toString().padStart(2, '0')}:00 (${hour.toString().padStart(2, '0')}) - PASSED `;
+                } else {
+                    option.disabled = false;
+                    option.textContent = `${hour.toString().padStart(2, '0')}:00 (${hour.toString().padStart(2, '0')})`;
+                }
+            } else if (selectedDate.getTime() > todayDate.getTime()) {
+                // Future date - all hours available
+                option.disabled = false;
+                option.textContent = `${hour.toString().padStart(2, '0')}:00 (${hour.toString().padStart(2, '0')})`;
+            }
+        });
+        
+        // Reset hour selection when date changes
+        hourSelect.value = '';
+    }
+    
+    // Update hours when date changes
+    dateInput.addEventListener('change', updateAvailableHours);
+    
+    // Initialize on page load
+    if (dateInput.value) {
+        updateAvailableHours();
+    }
+</script>
+
+{% endblock %}

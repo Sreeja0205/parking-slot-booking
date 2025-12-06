@@ -1,0 +1,101 @@
+<!-- booking/templates/booking/my_bookings.html -->
+{% extends 'booking/base.html' %}
+
+{% block title %}My Bookings - Parking Slot Booking{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-12">
+            <h2 class="mb-4">📋 My Parking Bookings</h2>
+        </div>
+    </div>
+
+    {% if bookings %}
+        <div class="row">
+            {% for booking in bookings %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card booking-card">
+                        <div class="card-body">
+                            <!-- Slot Number -->
+                            <h5 class="card-title" style="font-size: 28px; margin-bottom: 15px;">
+                                🅿️ {{ booking.slot.slot_number }}
+                            </h5>
+
+                            <!-- Booking Details -->
+                            <div style="background: rgba(255, 255, 255, 0.1); padding: 12px; border-radius: 5px; margin-bottom: 15px;">
+                                <p class="mb-2">
+                                    <strong>📅 Date:</strong> {{ booking.booking_date }}
+                                </p>
+                                <p class="mb-2">
+                                    <strong>⏰ Time:</strong> 
+                                    {{ booking.start_hour|stringformat:"02d" }}:00 - {{ booking.end_hour|stringformat:"02d" }}:00
+                                </p>
+                                <p class="mb-0">
+                                    <strong>⏱️ Duration:</strong> 
+                                    {{ booking.end_hour|add:booking.start_hour|stringformat:"d" }} hour(s)
+                                </p>
+                            </div>
+
+                            <!-- Booking Status -->
+                            {% now "Y-m-d" as today %}
+                            {% if booking.booking_date < today %}
+                                <span class="badge badge-warning" style="font-size: 14px; padding: 8px;">
+                                    ✅ Completed
+                                </span>
+                            {% else %}
+                                <span class="badge badge-success" style="font-size: 14px; padding: 8px;">
+                                    🔵 Active
+                                </span>
+                            {% endif %}
+
+                            <!-- Booking ID (Optional) -->
+                            <p class="mt-3 mb-0" style="font-size: 12px; opacity: 0.8;">
+                                Booking ID: #{{ booking.id }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Statistics Section -->
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="alert alert-info">
+                    <h6>📊 Your Booking Statistics:</h6>
+                    <p class="mb-0">
+                        <strong>Total Bookings:</strong> {{ bookings|length }}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+    {% else %}
+        <!-- No Bookings Message -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="alert alert-warning alert-dismissible fade show" role="alert" style="text-align: center;">
+                    <h5>📭 No Bookings Yet</h5>
+                    <p>You haven't made any parking slot bookings yet.</p>
+                    <p>
+                        <a href="{% url 'home' %}" class="btn btn-primary">
+                            🔍 Search and Book a Slot Now
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Back Button -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <a href="{% url 'home' %}" class="btn btn-outline-primary">
+                ⬅️ Back to Home
+            </a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

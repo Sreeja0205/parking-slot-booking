@@ -1,0 +1,107 @@
+<!-- booking/templates/booking/register.html -->
+{% extends 'booking/base.html' %}
+
+{% block title %}Register - Parking Slot Booking{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card" style="border: 2px solid #28a745;">
+                <div class="card-body">
+                    <h3 class="card-title text-center mb-4">
+                        ✍️ Create New Account
+                    </h3>
+
+                    <!-- Display Form Errors -->
+                    {% if form.errors %}
+                        <div class="alert alert-danger" role="alert">
+                            <h5>❌ Registration Failed</h5>
+                            {% for field, errors in form.errors.items %}
+                                <p><strong>{{ field }}:</strong></p>
+                                <ul>
+                                    {% for error in errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <form method="POST" action="{% url 'register' %}" novalidate>
+                        {% csrf_token %}
+
+                        <!-- Username Field -->
+                        <div class="form-group">
+                            <label for="id_username"><strong>Username:</strong></label>
+                            <input 
+                                type="text" 
+                                name="username" 
+                                id="id_username" 
+                                class="form-control" 
+                                placeholder="Enter a unique username"
+                                required
+                            >
+                            {% if form.username.help_text %}
+                                <small class="form-text text-muted">
+                                    {{ form.username.help_text|safe }}
+                                </small>
+                            {% endif %}
+                        </div>
+
+                        <!-- Password Field -->
+                        <div class="form-group">
+                            <label for="id_password1"><strong>Password:</strong></label>
+                            <input 
+                                type="password" 
+                                name="password1" 
+                                id="id_password1" 
+                                class="form-control" 
+                                placeholder="Enter a strong password"
+                                required
+                            >
+                            {% if form.password1.help_text %}
+                                <small class="form-text text-muted">
+                                    {{ form.password1.help_text|safe }}
+                                </small>
+                            {% endif %}
+                        </div>
+
+                        <!-- Confirm Password Field -->
+                        <div class="form-group">
+                            <label for="id_password2"><strong>Confirm Password:</strong></label>
+                            <input 
+                                type="password" 
+                                name="password2" 
+                                id="id_password2" 
+                                class="form-control" 
+                                placeholder="Re-enter your password"
+                                required
+                            >
+                            {% if form.password2.help_text %}
+                                <small class="form-text text-muted">
+                                    {{ form.password2.help_text|safe }}
+                                </small>
+                            {% endif %}
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn btn-success btn-block btn-lg mt-3">
+                            ✅ Register
+                        </button>
+                    </form>
+
+                    <!-- Link to Login -->
+                    <hr>
+                    <p class="text-center mt-3">
+                        Already have an account? 
+                        <a href="{% url 'login' %}" style="font-weight: bold; color: #007bff;">
+                            Login here
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
